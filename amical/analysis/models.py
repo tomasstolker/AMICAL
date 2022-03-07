@@ -6,6 +6,7 @@ from amical.tools import mas2rad
 
 def shiftFourier(Utable, Vtable, wl, C_in, x0, y0):
     """Shift the image (apply a phasor in Fourier space."""
+    wl = wl[0]
     u = Utable / wl
     v = Vtable / wl
     C_out = C_in * np.exp(-2j * np.pi * (u * x0 + v * y0))

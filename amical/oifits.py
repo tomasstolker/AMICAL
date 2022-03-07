@@ -1061,17 +1061,23 @@ def show(
         isclass = False
 
     if isclass:
-        l_dic = [
-            cal2dict(
-                x,
-                pa=pa,
-                true_flag_v2=true_flag_v2,
-                ind_hole=ind_hole,
-                true_flag_t3=true_flag_t3,
-                snr=snr,
-            )
-            for x in inputList
-        ]
+        l_dic = []
+        for i, x in enumerate(inputList):
+            print(pa[i])
+            l_dic.append(cal2dict(x, pa=pa[i], true_flag_v2=true_flag_v2,
+                ind_hole=ind_hole, true_flag_t3=true_flag_t3, snr=snr))
+
+        # l_dic = [
+        #     cal2dict(
+        #         x,
+        #         pa=pa,
+        #         true_flag_v2=true_flag_v2,
+        #         ind_hole=ind_hole,
+        #         true_flag_t3=true_flag_t3,
+        #         snr=snr,
+        #     )
+        #     for x in inputList
+        # ]
         print("\n -- SHOW -- Inputs are classes from amical.calibrate:")
         print("-> (Check true_flag_v2, true_flag_t3 and snr parameters)\n")
     elif type(inputList[0]) is str:
@@ -1094,7 +1100,7 @@ def show(
 
     props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
 
-    textstr = "PA = %2.1f deg" % pa
+    # textstr = "PA = %2.1f deg" % pa
 
     fontsize = 14
     fig = plt.figure(figsize=(16, 5.5))
@@ -1128,15 +1134,15 @@ def show(
         labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
         ax1.legend(handles, labels, loc="best", fontsize=9)
 
-    plt.text(
-        0.02,
-        0.98,
-        textstr,
-        transform=ax1.transAxes,
-        fontsize=13,
-        verticalalignment="top",
-        bbox=props,
-    )
+    # plt.text(
+    #     0.02,
+    #     0.98,
+    #     textstr,
+    #     transform=ax1.transAxes,
+    #     fontsize=13,
+    #     verticalalignment="top",
+    #     bbox=props,
+    # )
 
     unitlabel = {
         "m": "m",

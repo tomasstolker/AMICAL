@@ -1079,6 +1079,7 @@ def extract_bs(
     save_to=None,
     verbose=False,
     display=True,
+    pa=None,
 ):
     """Compute the bispectrum (bs, v2, cp, etc.) from a data cube.
 
@@ -1134,6 +1135,8 @@ def extract_bs(
         If True, print usefull informations during the process.\n
     `display` {bool}:
         If True, display all figures,\n
+    `pa` {float}
+        Parallactic angle (deg).
 
     Returns:
     --------
@@ -1349,7 +1352,8 @@ def extract_bs(
 
     # 13. Compute the absolute oriention (North-up, East-left)
     # ------------------------------------------------------------------------
-    pa = compute_pa(hdr, n_ps, display=display, verbose=verbose)
+    if pa is None:
+        pa = compute_pa(hdr, n_ps, display=display, verbose=verbose)
 
     # Compile informations in the storage infos class
     infos = _add_infos_header(infos, hdr, mf, pa, filename, maskname, npix)
