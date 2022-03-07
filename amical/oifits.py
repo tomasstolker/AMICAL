@@ -1063,7 +1063,6 @@ def show(
     if isclass:
         l_dic = []
         for i, x in enumerate(inputList):
-            print(pa[i])
             l_dic.append(cal2dict(x, pa=pa[i], true_flag_v2=true_flag_v2,
                 ind_hole=ind_hole, true_flag_t3=true_flag_t3, snr=snr))
 
