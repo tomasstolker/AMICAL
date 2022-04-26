@@ -29,7 +29,7 @@ def visUniformDisk(Utable, Vtable, Lambda, param):
 
     diam = mas2rad(param["diam"])
 
-    r = np.sqrt(u ** 2 + v ** 2)
+    r = np.sqrt(u**2 + v**2)
 
     C_centered = 2 * special.j1(np.pi * r * diam) / (np.pi * r * diam)
     C = shiftFourier(
@@ -60,7 +60,7 @@ def visBinary(Utable, Vtable, Lambda, param):
     if dm < 0:
         return np.array([np.nan] * len(Lambda))
     f1 = 1
-    f2 = f1 / 2.5 ** dm
+    f2 = f1 / 2.5**dm
     ftot = f1 + f2
 
     rel_f1 = f1 / ftot
@@ -83,7 +83,7 @@ def visBinary_res(Utable, Vtable, Lambda, param):
     if dm < 0:
         return np.array([np.nan] * len(Lambda))
     f1 = 1
-    f2 = f1 / 2.5 ** dm
+    f2 = f1 / 2.5**dm
     ftot = f1 + f2
 
     rel_f1 = f1 / ftot
@@ -122,7 +122,7 @@ def visGaussianDisk(Utable, Vtable, Lambda, param):
     x0 = param["x0"]
     y0 = param["y0"]
 
-    r2 = ((np.pi ** 2) * (u ** 2 + v ** 2) * (fwhm ** 2)) / (4.0 * np.log(2.0))
+    r2 = ((np.pi**2) * (u**2 + v**2) * (fwhm**2)) / (4.0 * np.log(2.0))
     C_centered = np.exp(-r2)
 
     # Deplacement du plan image
