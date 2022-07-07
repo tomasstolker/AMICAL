@@ -115,6 +115,7 @@ def crop_max(img, dim, offx=0, offy=0, filtmed=True, f=3):
             " the PSF center in at least one dimension. The max size for this image is"
             f" {isz_max}"
         )
+        fits.writeto('crop_error.fits', img, overwrite=True)
         raise ValueError(size_msg)
     cutout = Cutout2D(img, (X, Y), dim)
     return cutout.data, (X, Y)
