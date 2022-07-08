@@ -398,6 +398,7 @@ def show_clean_params(
     """
     with fits.open(filename) as fd:
         data = fd[ihdu].data
+    data = np.nan_to_num(data)
     img0 = data[nframe]
     dims = img0.shape
 
@@ -704,6 +705,7 @@ def select_clean_data(
         cube = hdu[ihdu].data
         hdr = hdu[0].header
 
+    cube = np.nan_to_num(cube)
     ins = hdr.get("INSTRUME", None)
 
     if ins == "SPHERE":
