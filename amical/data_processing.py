@@ -105,6 +105,7 @@ def select_data(cube, clip_fact=0.5, clip=False, verbose=True, display=True):
 
     std_flux = np.std(fluxes)
     med_flux = np.median(fluxes)
+    max_flux = np.max(fluxes)
 
     if verbose:
         if (med_flux / std_flux) <= 5.0:
@@ -114,7 +115,8 @@ def select_data(cube, clip_fact=0.5, clip=False, verbose=True, display=True):
                 "cyan",
             )
 
-    limit_flux = med_flux - clip_fact * std_flux
+    # limit_flux = med_flux - clip_fact * std_flux
+    limit_flux = max_flux - clip_fact * std_flux
 
     if clip:
         cond_clip = fluxes > limit_flux
@@ -198,7 +200,7 @@ def select_data(cube, clip_fact=0.5, clip=False, verbose=True, display=True):
             "%i/%i (%2.1f%%) are flagged as bad frames"
             % (n_bad, len(cube), 100 * float(n_bad) / len(cube))
         )
-    return cube_cleaned_checked
+    return cube_cleaned_checked, ind_clip
 
 
 def _get_ring_mask(r1, dr, isz, center=None):
@@ -575,6 +577,7 @@ def clean_data(
     Returns:
     --------
     `cube` {np.array} -- Cleaned datacube.
+    `l_bad_frame` {np.array} -- Frame indices that were removed.
     """
     n_im = data.shape[0]
     cube_cleaned = []  # np.zeros([n_im, isz, isz])
@@ -618,11 +621,16 @@ def clean_data(
             filtmed = f_kernel is not None
             im_rec_max = crop_max(
                 img_biased, isz, offx=offx, offy=offy, filtmed=filtmed, f=f_kernel
-            )[0]
+            )
+            if im_rec_max is not None:
+                im_rec_max = im_rec_max[0]
+
         else:
             im_rec_max = img_biased.copy()
 
-        if (
+        if im_rec_max is None:
+            l_bad_frame.append(i)
+        elif (
             (im_rec_max.shape[0] != im_rec_max.shape[1])
             or (isz is not None and im_rec_max.shape[0] != isz)
             or (isz is None and im_rec_max.shape[0] != img0.shape[0])
@@ -643,7 +651,7 @@ def clean_data(
     if verbose:
         print("Bad centering frame number:", l_bad_frame)
     cube_cleaned = np.array(cube_cleaned)
-    return cube_cleaned
+    return cube_cleaned, l_bad_frame
 
 
 def select_clean_data(
@@ -700,6 +708,8 @@ def select_clean_data(
     Returns:
     --------
     `cube_final` {np.array}: Cleaned and selected datacube.
+    `idx_removed` {np.array} -- Frame indices that were removed due to centering error.
+    `idx_clip` {np.array} -- Frame indices that were removed with sigma clipping.
     """
     with fits.open(filename) as hdu:
         cube = hdu[ihdu].data
@@ -758,7 +768,7 @@ def select_clean_data(
             window=window,
         )
 
-    cube_cleaned = clean_data(
+    cube_cleaned, idx_removed = clean_data(
         cube,
         isz=isz,
         r1=r1,
@@ -780,7 +790,13 @@ def select_clean_data(
     if cube_cleaned is None:
         return None
 
-    cube_final = select_data(
+    cube_final, idx_clip = select_data(
         cube_cleaned, clip=clip, clip_fact=clip_fact, verbose=verbose, display=display
     )
-    return cube_final
+
+    # idx_removed = [*idx_removed, *idx_clip]
+
+    # The indices should be returned separately because
+    # clean_data applies a first frame selection and
+    # select_data a second frame selection so
+    return cube_final, sorted(idx_removed), sorted(idx_clip)

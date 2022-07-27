@@ -1283,6 +1283,9 @@ def extract_bs(
     bs_arr = complex_bs["bs_arr"]
     fluxes = complex_bs["fluxes"]
 
+    # Add complex visibilities to output dictrionary
+    obs_result["complex"] = cvis_arr
+
     # 7. Compute correlated noise and bias at the peak position
     # ---------------------------------------------------------
     bias, dark_bias, autocor_noise = _compute_corr_noise(

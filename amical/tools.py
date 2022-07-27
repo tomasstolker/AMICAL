@@ -10,6 +10,7 @@ General tools.
 --------------------------------------------------------------------
 """
 import math as m
+import warnings
 
 import h5py
 import matplotlib.pyplot as plt
@@ -101,7 +102,7 @@ def crop_max(img, dim, offx=0, offy=0, filtmed=True, f=3):
 
     Returns
     -------
-    `cutout`: {numpy.array}
+    `cutout`: {numpy.array}, None
         Resized image.
     """
     xmax, ymax = find_max(img, filtmed=filtmed, f=f)
@@ -115,9 +116,13 @@ def crop_max(img, dim, offx=0, offy=0, filtmed=True, f=3):
             " the PSF center in at least one dimension. The max size for this image is"
             f" {isz_max}"
         )
-        fits.writeto('crop_error.fits', img, overwrite=True)
-        raise ValueError(size_msg)
+        # fits.writeto('crop_error.fits', img, overwrite=True)
+        # raise ValueError(size_msg)
+        warnings.warn(size_msg)
+        return None
+
     cutout = Cutout2D(img, (X, Y), dim)
+
     return cutout.data, (X, Y)
 
 
