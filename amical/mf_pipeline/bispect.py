@@ -15,32 +15,25 @@ and calc_bispect.pro).
 import os
 import sys
 import time
-import warnings
 from pathlib import Path
 
 import numpy as np
 from termcolor import cprint
 from tqdm import tqdm
 
-from .idl_function import dblarr
-from .idl_function import dist
-from .idl_function import regress_noc
+from amical.externals.munch import munchify as dict2class
 from amical.get_infos_obs import get_mask
-from amical.mf_pipeline.ami_function import bs_multi_triangle
-from amical.mf_pipeline.ami_function import compute_index_mask
-from amical.mf_pipeline.ami_function import give_peak_info2d
-from amical.mf_pipeline.ami_function import make_mf
-from amical.mf_pipeline.ami_function import phase_chi2
-from amical.mf_pipeline.ami_function import tri_pix
-from amical.tools import compute_pa
-from amical.tools import cov2cor
+from amical.mf_pipeline.ami_function import (
+    bs_multi_triangle,
+    compute_index_mask,
+    give_peak_info2d,
+    make_mf,
+    phase_chi2,
+    tri_pix,
+)
+from amical.tools import compute_pa, cov2cor
 
-
-def _ASTROPY_VERSION():
-    from importlib.metadata import version
-    from packaging.version import Version
-
-    return Version(version("astropy"))
+from .idl_function import dblarr, dist, regress_noc
 
 
 def _compute_complex_bs(
@@ -357,7 +350,6 @@ def _check_input_infos(hdr, targetname=None, filtname=None, instrum=None, verbos
     input arguments. Return the infos class containing important informations of
     the input header (keys: target, seeing, instrument, ...)
     """
-    from munch import munchify as dict2class
 
     target = hdr.get("OBJECT")
     filt = hdr.get("FILTER")
@@ -1003,40 +995,11 @@ def _compute_phs_error(complex_bs, fitmat, index_mask, npix, imsize=3):
 
 def _add_infos_header(infos, hdr, mf, pa, filename, maskname, npix):
     """Save important informations and some parts of the original header."""
-    from astropy.io import fits
-    from packaging.version import Version
-
     infos["pixscale"] = mf.pixelSize
     infos["pa"] = pa
     infos["filename"] = filename
     infos["maskname"] = maskname
     infos["isz"] = npix
-
-    # Raise a warning that old astropy version drop commentary cards, but only if
-    # there are any in the original header
-    hdr_commentary_keys = fits.Card._commentary_keywords
-    if any(hck in hdr for hck in hdr_commentary_keys) and (
-        _ASTROPY_VERSION() < Version("5.0rc")
-    ):
-        warnings.warn(
-            "Commentary cards are removed from the header with astropy"
-            f" version < 5.0. Your astropy version is"
-            f" {_ASTROPY_VERSION()}",
-            RuntimeWarning,
-        )
-        # HACK: astropy _HeaderCommentaryCards are registered as mappings,
-        # so munch tries to access their keys, leading to attribute error
-        # to prevent this, we remove commentary cards as a temporary fix.
-        # (As of September 2 2021, with astropy version 4.3.1)
-        # See:
-        # https://github.com/SydneyAstrophotonicInstrumentationLab/AMICAL/issues/31
-        # https://github.com/astropy/astropy/issues/11866
-        # Resolved upstream with
-        # https://github.com/astropy/astropy/pull/11923
-        hdr = hdr.copy()
-        for key in hdr_commentary_keys:
-            hdr.remove(key, ignore_missing=True, remove_all=True)
-
     infos["hdr"] = hdr
 
     # Save keys of the original header (as needed):
@@ -1159,7 +1122,6 @@ def extract_bs(
         and the important information (.infos). The .mask, .infos and .matrix are also class with
         various quantities (see .mask.__dict__.keys()).
     """
-    from munch import munchify as dict2class
     from astropy.io import fits
 
     if verbose:

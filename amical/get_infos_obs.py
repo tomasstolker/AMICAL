@@ -8,13 +8,17 @@ AMICAL: Aperture Masking Interferometry Calibration and Analysis Library
 Instruments and mask informations.
 --------------------------------------------------------------------
 """
-import importlib.resources
 import sys
 
 import numpy as np
 from termcolor import cprint
 
 from amical.tools import mas2rad
+
+if sys.version_info >= (3, 9):
+    import importlib.resources as importlib_resources
+else:
+    import importlib_resources
 
 
 def get_mask(ins, mask, first=0):
@@ -226,22 +230,9 @@ def get_wavelength(ins, filtname):
     """Return dictionnary containning saved informations about filters."""
     from astropy.io import fits
 
-    if sys.version_info >= (3, 9):
-        YJfile = importlib.resources.files("amical").joinpath(
-            "internal_data", "ifs_wave_YJ.fits"
-        )
-        YJHfile = importlib.resources.files("amical").joinpath(
-            "internal_data", "ifs_wave_YJH.fits"
-        )
-    else:
-        import pkg_resources
-
-        YJfile = pkg_resources.resource_stream(
-            "amical", "internal_data/ifs_wave_YJ.fits"
-        )
-        YJHfile = pkg_resources.resource_stream(
-            "amical", "internal_data/ifs_wave_YJH.fits"
-        )
+    datadir = importlib_resources.files("amical") / "internal_data"
+    YJfile = datadir / "ifs_wave_YJ.fits"
+    YJHfile = datadir / "ifs_wave_YJH.fits"
 
     with fits.open(YJfile) as fd:
         wave_YJ = fd[0].data
@@ -276,16 +267,11 @@ def get_wavelength(ins, filtname):
             f"--- Error: instrument <{ins}> not found ---\n"
             "Available: %s" % list(dic_filt.keys())
         )
-
-    try:
-        wl = np.array(dic_filt[ins][filtname]) * 1e-6
-    except KeyError:
-        wl = np.NaN
+    if filtname not in dic_filt[ins]:
         raise KeyError(
-            f"Missing input: filtname <{filtname}> not found for {ins} (Available: %s)"
-            % list(dic_filt[ins].keys())
+            f"Missing input: filtname <{filtname}> not found for {ins} (Available: {list(dic_filt[ins])})"
         )
-    return wl
+    return np.array(dic_filt[ins][filtname]) * 1e-6
 
 
 def get_pixel_size(ins):
