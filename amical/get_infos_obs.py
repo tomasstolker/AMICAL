@@ -168,7 +168,7 @@ def get_mask(ins, mask, first=0):
                     [4.2874,-2.1840],
                     [4.2874,2.1840],
                 ]
-            ),
+            )*(4/6),
             "g9": np.array(
                 [
                     [-4.5116,-2.1350],
@@ -283,6 +283,7 @@ def get_wavelength(ins, filtname):
 def get_pixel_size(ins):
     saved_pixel_detector = {
         "NIRISS": 65.6,
+        "ERIS": 13.,
         "SPHERE": 12.27,
         "VISIR": 45,
         "SPHERE-IFS": 7.46,
