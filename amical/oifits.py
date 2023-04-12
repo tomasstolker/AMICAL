@@ -1198,29 +1198,11 @@ def show(
     if type(inputList) is not list:
         inputList = [inputList]
 
-    try:
-        inputList[0].v2
-        isclass = True
-    except AttributeError:
-        isclass = False
-
-    if isclass:
+    if hasattr(inputList[0], "v2"):
         l_dic = []
         for i, x in enumerate(inputList):
             l_dic.append(cal2dict(x, pa=pa[i], true_flag_v2=true_flag_v2,
                 ind_hole=ind_hole, true_flag_t3=true_flag_t3, snr=snr))
-
-        # l_dic = [
-        #     cal2dict(
-        #         x,
-        #         pa=pa,
-        #         true_flag_v2=true_flag_v2,
-        #         ind_hole=ind_hole,
-        #         true_flag_t3=true_flag_t3,
-        #         snr=snr,
-        #     )
-        #     for x in inputList
-        # ]
         print("\n -- SHOW -- Inputs are classes from amical.calibrate:")
         print("-> (Check true_flag_v2, true_flag_t3 and snr parameters)\n")
     elif type(inputList[0]) is str:
