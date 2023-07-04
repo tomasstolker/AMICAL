@@ -55,7 +55,12 @@ def check_params_model(param):
         elong = np.cos(np.deg2rad(param["incl"]))
         majorAxis = mas2rad(param["majorAxis"])
         posang = np.deg2rad(param["posang"])
-        if (elong < 1) or (posang < 0) or (posang > 180) or (majorAxis < 0):
+        if (
+            (elong < 1 and abs(1 - elong) > 4e-16)
+            or (posang < 0)
+            or (posang > np.pi)
+            or (majorAxis < 0)
+        ):
             log = "# elong > 1,\n# minorAxis > 0 mas,\n# 0 < angle < 180 deg.\n"
             isValid = False
 
@@ -142,7 +147,7 @@ def model_standard(obs, param):
             else:
                 mod = np.nan
 
-            res[i] = mod
+            res[i] = np.asarray(mod).item()
         except TypeError:
             pass
 
@@ -368,8 +373,7 @@ def fits2obs(
             print("-> Flag in oifits files used.")
         if cond_wl:
             print(
-                r"-> Restriction on wavelenght: %2.2f < %s < %2.2f µm"
-                % (wl_min, chr(955), wl_max)
+                rf"-> Restriction on wavelenght: {wl_min:2.2f} < {chr(955)} < {wl_max:2.2f} µm"
             )
         if cond_uncer:
             print(rf"-> Restriction on uncertainties: {chr(949)} < {rel_max:2.1f} %")
@@ -385,7 +389,7 @@ def _normalize_err_obs(obs, verbose=False):
     n = [0, 0, 0, 0]
     for o in obs:
         for j, t in enumerate(techs):
-            if any([x in o[1] for x in t]):
+            if any(x in o[1] for x in t):
                 n[j] += 1
     if verbose:
         print("-" * 50)
@@ -396,7 +400,7 @@ def _normalize_err_obs(obs, verbose=False):
 
     for i, o in enumerate(obs):
         for j, t in enumerate(techs):
-            if any([x in o[1] for x in t]):
+            if any(x in o[1] for x in t):
                 errs[i] *= np.sqrt(float(n[j]) / len(obs) * len(n))
     return errs
 
@@ -490,7 +494,7 @@ def compute_chi2_curve(
     chi2r_m = l_chi2r.min()
     chi2_m = l_chi2.min()
 
-    fitted_param = array_params[l_chi2 == chi2_m]
+    fitted_param = array_params[l_chi2 == chi2_m].item()
 
     c_left = array_params <= fitted_param
     c_right = array_params >= fitted_param

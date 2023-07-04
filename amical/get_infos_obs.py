@@ -451,8 +451,7 @@ def get_ifu_table(
         print(f"\nInstrument: {instrument}, spectral range: {filtname}")
         print("-----------------------------")
         print(
-            "spectral coverage: %2.2f - %2.2f µm (step = %2.2f)"
-            % (wl[0], wl[-1], np.diff(wl)[0])
+            f"spectral coverage: {wl[0]:2.2f} - {wl[-1]:2.2f} µm (step = {np.diff(wl)[0]:2.2f})"
         )
 
     one_wl = True
@@ -480,7 +479,7 @@ def get_ifu_table(
                 np.arange(len(wl))[i_wl],
                 wl[i_wl],
                 "ro",
-                label="Selected (%2.2f µm)" % wl[i_wl],
+                label="Selected (%2.2f µm)" % wl[i_wl[0]],
             )
         elif multiple_wl:
             plt.plot(
