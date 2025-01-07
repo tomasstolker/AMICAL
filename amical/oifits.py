@@ -1228,7 +1228,7 @@ def show(
 
     props = {"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5}
 
-    textstr = f"PA = {pa:2.1f} deg"
+    # textstr = f"PA = {pa:2.1f} deg"
 
     fontsize = 14
     fig = plt.figure(figsize=(16, 5.5))
