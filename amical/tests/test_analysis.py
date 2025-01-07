@@ -83,7 +83,7 @@ def test_model_disk(example_oifits):
 
     model = f_model(d.u, d.v, d.wl, param)
     assert len(d.u) == len(model)
-    assert type(model[0]) == np.complex128
+    assert type(model[0]) is np.complex128
 
 
 def test_model_edisk(example_oifits):
@@ -107,7 +107,7 @@ def test_model_edisk(example_oifits):
     model = f_model(d.u, d.v, d.wl, param)
     assert len(d.u) == len(model)
     assert len(d.u) == len(V2)
-    assert type(model[0]) == np.complex128
+    assert type(model[0]) is np.complex128
 
 
 def test_model_Clumpydisk(example_oifits):
@@ -129,7 +129,7 @@ def test_model_Clumpydisk(example_oifits):
 
     model = f_model(d.u, d.v, d.wl, param)
     assert len(d.u) == len(model)
-    assert type(model[0]) == np.complex128
+    assert type(model[0]) is np.complex128
 
 
 def test_model_binary(example_oifits):
@@ -145,7 +145,7 @@ def test_model_binary(example_oifits):
 
     model = f_model(d.u, d.v, d.wl, param)
     assert len(d.u) == len(model)
-    assert type(model[0]) == np.complex128
+    assert type(model[0]) is np.complex128
 
 
 def test_model_binaryres(example_oifits):
@@ -156,7 +156,7 @@ def test_model_binaryres(example_oifits):
 
     model = f_model(d.u, d.v, d.wl, param)
     assert len(d.u) == len(model)
-    assert type(model[0]) == np.complex128
+    assert type(model[0]) is np.complex128
 
 
 def test_model_binary_error(example_oifits):
@@ -278,7 +278,7 @@ def test_smartfit(example_oifits, multiproc):
     pa, e_pa = fit["best"]["theta"], fit["uncer"]["theta"]
     dm, e_dm = fit["best"]["dm"], fit["uncer"]["dm"]
 
-    assert type(obs) == np.ndarray
+    assert type(obs) is np.ndarray
     assert isinstance(fit, dict)
 
     # Check close true value

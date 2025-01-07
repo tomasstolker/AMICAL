@@ -100,16 +100,21 @@ def test_sky_correction_mask_all():
 
 
 def test_sky_correction_mask_zeros():
-    # Check that empty correction mask gives warning and does nothing
+    # Check that empty correction mask gives warnings and does nothing
     img_dim = 80
     img = np.random.random((img_dim, img_dim))
     mask = np.zeros_like(img, dtype=bool)
 
-    with pytest.warns(
-        RuntimeWarning,
-        match="Background not computed because mask has no True values",
-    ):
+    with pytest.warns(RuntimeWarning) as record:
         img_corr = sky_correction(img, mask=mask)[0]
+    assert len(record) == 2
+    assert (
+        record[0].message.args[0]
+        == "Background not computed because mask has no True values"
+    )
+    assert record[1].message.args[0] == (
+        "Background not computed, likely because specified radius is out of bounds"
+    )
 
     assert np.all(img_corr == img)
 
@@ -173,11 +178,20 @@ def test_clean_data_none_kwargs():
     data = np.random.random((n_im, img_dim, img_dim))
 
     # sky=True raises a warning by default because required kwargs are None
-    with pytest.warns(
-        RuntimeWarning,
-        match="sky is set to True, but r1 and mask are set to None. Skipping sky correction",
-    ):
+    with pytest.warns(RuntimeWarning) as record:
         cube_clean_sky = clean_data(data)
+
+    # we might record many more than 2 warnings, but we filter duplicates
+    # to replicate Python's default behaviour: warnings only pop once per call site
+    unique_messages = {_.message.args[0] for _ in record}
+    assert len(unique_messages) == 2, "\n".join(unique_messages)
+    assert unique_messages == {
+        (
+            "sky is set to True, but r1 and mask are set to None. "
+            "Skipping sky correction"
+        ),
+        "apod is set to True, but window is None. Skipping apodisation",
+    }
 
     # apod=True raises a warning by default because required kwargs are None
     with pytest.warns(
@@ -220,7 +234,7 @@ def test_clean(global_datadir):
         cube_clean, 40, 40, radius=20, dx=3, dy=3, method="bg"
     )
 
-    assert type(cube_clean) == np.ndarray
+    assert type(cube_clean) is np.ndarray
     assert im1.shape == cube_clean.shape
     assert im2.shape == cube_clean.shape
 
@@ -607,3 +621,32 @@ def test_clean_crop_order():
     img_correct_crop = crop_max(correct, isz, filtmed=False)[0]
 
     assert np.all(np.abs(img_correct_crop - img_cube_clean) < 10 * np.finfo(float).eps)
+
+
+@pytest.mark.usefixtures("close_figures")
+def test_isz_none(global_datadir):
+    fits_file = global_datadir / "test.fits"
+
+    clean_param = {
+        "isz": None,
+        "r1": 35,
+        "dr": 2,
+        "apod": True,
+        "window": 65,
+        "f_kernel": 3,
+    }
+
+    fig = amical.show_clean_params(fits_file, **clean_param)
+
+    assert isinstance(fig, plt.Figure)
+    assert fig.axes[0].get_xlim() == (0.0, 80.0)
+    assert fig.axes[0].get_ylim() == (0.0, 80.0)
+
+    # Set clip=False such that the shape does not changes
+    cube_clean = amical.select_clean_data(fits_file, clip=False, **clean_param)
+
+    # Get the shape of the array with input images
+    fits_images = fits.getdata(fits_file)
+
+    assert isinstance(cube_clean, np.ndarray)
+    assert cube_clean.shape == fits_images.shape
